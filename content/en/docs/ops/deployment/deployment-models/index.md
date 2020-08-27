@@ -31,7 +31,7 @@ service mesh or will they be federated into a {{< gloss >}}multi-mesh{{< /gloss 
 
 ## Definition of a Mesh in Istio
 
-Before answering the questions above, it is imperative to understand the definition of a `mesh` in Istio. 
+Before answering the questions above, it is imperative to understand the definition of a `mesh` in Istio.
 
 _A mesh is one single administrative domain, consisting of one single shared root CA trusted by 
 all workloads in the mesh, irrespective of the clusters or control planes in the system._
@@ -179,14 +179,13 @@ network of the consumers.
 ## Control plane models
 
 An Istio mesh uses the {{< gloss >}}control plane{{< /gloss >}} to configure all
-communication between workload instances within the mesh. At one extreme, you can 
-choose to deploy one control plane per cluster in the mesh, while at the other extreme,
+communication between workload instances within the mesh. At one extreme, you can choose
+to deploy one control plane per cluster in the mesh, while at the other extreme,
 you can host one single shared control plane for all clusters in the mesh.
 
-_Note: Each control plane will only honor configurations (Istio Networking, 
-Security CRDs, Global Mesh configs) that are present in its local 
-Kubernetes cluster. If you wish to apply a configuration to all workloads in the mesh 
-across control planes, it is your responsibility to replicate the configuration to the 
+_Note: Each control plane will only honor configurations (such as Gateways, VirtualServices, etc.)
+that are present in its local Kubernetes cluster. If you wish to apply a configuration to all workloads in the mesh
+across control planes, it is your responsibility to replicate the configuration to the
 Kubernetes clusters associated with each control plane._
 
 ### Shared control plane models
@@ -249,8 +248,8 @@ the workloads in clusters managed by this control plane.
 #### Failover in Shared Control Planes
 
 You can improve shared control plane availability through fail over. When a shared control
-plane instance becomes unavailable, workload instances can connect to another available 
-control plane instance, assuming the other control plane has identical configuration. Fail 
+plane instance becomes unavailable, workload instances can connect to another available
+control plane instance, assuming the other control plane has identical configuration. Fail
 over can happen across clusters, zones, or regions.
 
 _Note: If the configuration across control planes is not in sync, outages may happen when a
@@ -266,8 +265,8 @@ workload fails over to a new control plane_.
 ### Independent Control Planes
 
 You can also deploy a control plane per cluster, with a shared root CA. Each cluster's control plane
-manages only the workloads in its own cluster. If the control plane is unavailable (due to upgrade or 
-temporary outage), the workloads will continue to function with the existing sidecar configuration and 
+manages only the workloads in its own cluster. If the control plane is unavailable (due to upgrade or
+temporary outage), the workloads will continue to function with the existing sidecar configuration and
 will re-attempt to connect to the local control plane periodically.
 
 This model affords the following benefits:
@@ -276,8 +275,7 @@ This model affords the following benefits:
   the outage is limited to only that cluster and the workloads within it.
 
 - Maximum configuration isolation: You can make configuration changes in one cluster without impacting
-workloads deployed in any other cluster.
-
+  workloads deployed in any other cluster.
 
 The following list ranks control plane deployment examples by availability, configuration isolation:
 
@@ -295,37 +293,34 @@ together, which is also known as {{< gloss >}}multi-mesh{{< /gloss >}}.
 
 ### Single mesh
 
-The simplest Istio deployment is a single mesh. A single mesh can span 
-[one or more clusters](#cluster-models) and [one or more networks](#network-models). 
-All workloads in a mesh share a common certificate authority or the same trust 
+The simplest Istio deployment is a single mesh. A single mesh can span
+[one or more clusters](#cluster-models) and [one or more networks](#network-models).
+All workloads in a mesh share a common certificate authority or the same trust
 domain depending on the following situations:
 
-- If you are using a vendor hosted CA that is shared across different customers, 
-  then it is imperative to use a single trust domain for the entire mesh, as the 
+- If you are using a vendor hosted CA that is shared across different customers,
+  then it is imperative to use a single trust domain for the entire mesh, as the
   root CA across different customers could be the same (i.e. the vendor's CA itself).
 
-- If you have your own root CA for all your clusters, you can choose to use a single shared 
+- If you have your own root CA for all your clusters, you can choose to use a single shared
   trust domain or a separate trust domain for each cluster.
   
-If you use a single shared trust domain, a service in a given namespace is globally unique - i.e. if 
-two clusters `cluster-1` and `cluster-2` have the same service `foo` in namespace `ns`, they will be 
-treated the same for purposes of security. With a trust domain for each cluster, there are no 
-restrictions on the uniqueness of service and namespaces. You can apply enforcement 
+If you use a single shared trust domain, a service in a given namespace is globally unique - i.e. if
+two clusters `cluster-1` and `cluster-2` have the same service `foo` in namespace `ns`, they will be
+treated the same for purposes of security. With a trust domain for each cluster, there are no
+restrictions on the uniqueness of service and namespaces. You can apply enforcement
 policies that allow or deny all traffic from one cluster (irrespective of the namespace/service) to another.
 
 ### Multiple meshes
 
-Multiple mesh deployments result from {{< gloss >}}mesh federation{{< /gloss >}}.
+Multiple mesh deployments result from {{< gloss >}}mesh federation{{< /gloss >}}, with the following capabilities:
 
-Multiple meshes afford the following capabilities beyond that of a single mesh:
-
-- Organizational boundaries: lines of business
-- Potential for cross vendor meshes to communicate with each 
+- Organizational boundaries: lines of business.
+- Potential for cross vendor meshes to communicate with each
   other if the trust bundles are setup properly.
 
-You can enable inter-mesh communication with {{< gloss >}}mesh federation{{<
-/gloss >}}. When federating, each mesh can expose a set of services and
-identities, which all participating meshes can recognize.
+You can enable inter-mesh communication with {{< gloss >}}mesh federation{{</gloss >}}.
+When federating, each mesh can expose a set of services and identities, which all participating meshes can recognize.
 
 {{< image width="50%"
     link="multi-mesh.svg"
@@ -358,8 +353,7 @@ Within a single Istio mesh, Istio ensures each workload instance has an
 appropriate certificate representing its own identity, and the trust bundle
 necessary to recognize all identities within the mesh and any federated meshes.
 The CA only creates and signs the certificates for those identities. This model
-allows workload instances in the mesh to authenticate each other when
-communicating.
+allows workload instances in the mesh to authenticate each other when communicating.
 
 {{< image width="50%"
     link="single-trust.svg"
@@ -386,7 +380,7 @@ those identities.
 
 ## Isolating teams within the mesh
 
-Istio does not have a formally defined notion of tenancy. However, you can achieve a great 
+Istio does not have a formally defined notion of tenancy. However, you can achieve a great
 level of isolation across different teams through the use of different namespaces or even separate clusters.
 Such soft tenancy models can be used to satisfy the following organizational requirements for isolation:
 
@@ -403,10 +397,10 @@ Istio supports two types of soft-tenancy models:
 
 ### Namespace isolation
 
-By default, services from multiple namespaces can communicate with each other. If a 
-single cluster is shared across many teams operating in different namespaces, 
-you can selectively choose which services to expose to other namespaces. You can 
-configure authorization policies for exposed services to restrict access to only the 
+By default, services from multiple namespaces can communicate with each other. If a
+single cluster is shared across many teams operating in different namespaces,
+you can selectively choose which services to expose to other namespaces. You can
+configure authorization policies for exposed services to restrict access to only the
 appropriate callers.
 
 {{< image width="50%"
@@ -419,6 +413,6 @@ appropriate callers.
 ### Cluster isolation
 
 You can also use the cluster as the unit of isolation in a mesh by giving each team
-a dedicated cluster, with its [own control plane](#independent-control-plane) allowing 
-them to manage their own configurations. Alternatively, if you can ensure that namespaces 
+a dedicated cluster, with its [own control plane](#independent-control-plane) allowing
+them to manage their own configurations. Alternatively, if you can ensure that namespaces
 are globally unique across clusters, you can use a shared control plane.
